@@ -2,25 +2,7 @@
   "private": true,
   "license": "MIT",
   "workspaces": [
-    "evm-test-helpers",
-    "evm-contracts",
-    "feeds",
-    "explorer",
-    "explorer/client",
-    "integration",
-    "integration-scripts",
-    "operator_ui",
-    "styleguide",
-    "tools",
-    "tools/ci-ts",
-    "tools/cypress-job-server",
-    "tools/echo-server",
-    "tools/external-adapter",
-    "tools/json-api-client",
-    "tools/local-storage",
-    "tools/redux",
-    "tools/ts-helpers",
-    "belt"
+    "packages/*"
   ],
   "engines": {
     "node": "~10.16"
