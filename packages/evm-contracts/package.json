@@ -8,7 +8,7 @@
   "private": false,
   "scripts": {
     "compile": "belt compile all",
-    "setup": "yarn compile && tsc -b tsconfig.test.json tsconfig.ethers.json",
+    "build": "yarn compile && tsc -b tsconfig.test.json tsconfig.ethers.json",
     "clean": "tsc -b --clean tsconfig.test.json tsconfig.ethers.json && rm -rf abi ethers truffle",
     "pretest": "tsc -b --clean tsconfig.ethers.json",
     "test": "jest --testTimeout 80000 --forceExit",

@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": "~10.16"
+    "node": ">=10.16"
   },
   "scripts": {
     "generate-typings": "typechain --target ethers --outDir src/generated \"dist/artifacts/*\"",
@@ -33,7 +33,7 @@
     "link_token": "^1.0.6",
     "request-promise": "4.2.5",
     "shelljs": "^0.8.3",
-    "source-map-support": "^0.5.13"
+    "source-map-support": "^0.5.19"
   },
   "devDependencies": {
     "@types/shelljs": "^0.8.5",

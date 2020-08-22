@@ -5,17 +5,19 @@
     "packages/*"
   ],
   "engines": {
-    "node": "~10.16"
+    "node": ">=10.16"
   },
   "scripts": {
+    "start": "lerna run start",
     "lint": "eslint --ext js,jsx,ts,tsx .",
-    "setup": "wsrun -me -t setup",
-    "setup:chainlink": "yarn wsrun -mre -p @chainlink/contracts -p @chainlink/operator-ui -t setup",
+    "setup": "lerna run setup",
+    "setup:chainlink": "lerna build --scope @chainlink/contracts --scope @chainlink/operator-ui",
     "setup:contracts": "yarn wsrun -mre -p @chainlink/contracts -t setup",
     "setup:integration": "yarn wsrun -mre -p @chainlink/integration* -t setup",
     "setup:explorer": "yarn wsrun -mre -p '@chainlink/explorer*' -t setup",
-    "clean": "wsrun -me clean",
-    "postinstall": "patch-package"
+    "clean": "lerna run clean",
+    "postinstall": "patch-package && lerna bootstrap",
+    "build": "go build -o chainlink ./packages/core/"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.15.0",
@@ -25,6 +27,7 @@
     "eslint-plugin-prettier": "^3.1.3",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^4.0.0",
+    "lerna": "^3.22.1",
     "patch-package": "^6.2.1",
     "postinstall-postinstall": "^2.0.0",
     "prettier": "^1.19.1",
@@ -34,7 +37,7 @@
   "resolutions": {
     "**/sha3": "^2.0.7",
     "**/keccak": "^3.0.0",
-    "**/source-map-support": "0.5.16",
+    "**/source-map-support": "0.5.19",
     "**/solc": "^0.6.4",
     "**/elliptic": "^6.5.3",
     "**/dot-prop": "^5.1.1"
