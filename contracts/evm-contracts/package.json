@@ -7,13 +7,15 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "prepare": "yarn clean && yarn build:clean",
     "compile": "belt compile all",
     "build": "yarn compile && tsc -b tsconfig.test.json tsconfig.ethers.json",
-    "clean": "tsc -b --clean tsconfig.test.json tsconfig.ethers.json && rm -rf abi ethers truffle",
+    "build:clean": "yarn compile && tsc -b --clean tsconfig.test.json tsconfig.ethers.json",
+    "clean": "rm -rf abi ethers truffle",
     "pretest": "tsc -b --clean tsconfig.ethers.json",
     "test": "jest --testTimeout 80000 --forceExit",
     "test:ci": "./scripts/test_ci",
-    "prepublishOnly": "yarn clean && yarn setup && yarn test:ci && yarn setup"
+    "prepublishOnly": "yarn clean && yarn build && yarn test:ci"
   },
   "devDependencies": {
     "@chainlink/belt": "0.0.1",
