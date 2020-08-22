@@ -8,10 +8,12 @@
   "author": "Chainlink Devs",
   "license": "MIT",
   "scripts": {
+    "prepare": "yarn generate-typings && yarn build:clean",
     "generate-typings": "typechain --target ethers --outDir src/generated src/LinkToken.json",
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean && yarn clean",
+    "clean": "rimraf -rf src/generated",
     "test": "jest",
-    "clean": "tsc -b --clean && rimraf -rf src/generated",
-    "setup": "yarn generate-typings && tsc -b",
     "prepublishOnly": "yarn setup --force && yarn test"
   },
   "dependencies": {

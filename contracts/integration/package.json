@@ -1,6 +1,6 @@
 {
-  "private": true,
   "name": "@chainlink/integration",
+  "private": true,
   "version": "0.6.0",
   "license": "MIT",
   "engines": {

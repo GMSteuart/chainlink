@@ -9,9 +9,10 @@
     "node": ">=10.16"
   },
   "scripts": {
+    "prepare": "yarn build:clean",
     "generate-typings": "typechain --target ethers --outDir src/generated \"dist/artifacts/*\"",
-    "setup": "sol-compiler && yarn generate-typings && tsc -b",
-    "clean": "tsc -b --clean && rimraf -rf src/generated",
+    "build": "sol-compiler && yarn generate-typings && tsc -b",
+    "build:clean": "tsc -b --clean && rimraf -rf src/generated",
     "count-transaction-events": "node ./dist/src/countTransactionEvents",
     "send-runlog-transaction": "node ./dist/src/sendRunlogTransaction",
     "send-ethlog-transaction": "node ./dist/src/sendEthlogTransaction",
