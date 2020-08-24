@@ -8,12 +8,15 @@ set -e
 # Version of abigen to install. Must be run within chainlink project
 GETH_VERSION=$(go list -json -m github.com/ethereum/go-ethereum | jq -r .Version)
 
-function realpath { echo $(cd $(dirname $1); pwd)/$(basename $1); }
+function realpath() { echo $(
+    cd $(dirname $1)
+    pwd
+)/$(basename $1); }
 THIS_DIR="$(realpath "$(dirname $0)")"
 
 NATIVE_ABIGEN_VERSION=v"$(
-    "$THIS_DIR/abigen" --version 2> /dev/null | \
-    grep -E -o '([0-9]+\.[0-9]+\.[0-9]+)'
+    "$THIS_DIR/abigen" --version 2>/dev/null |
+        grep -E -o '([0-9]+\.[0-9]+\.[0-9]+)'
 )" || true
 
 if [ "$NATIVE_ABIGEN_VERSION" == "$GETH_VERSION" ]; then
@@ -21,21 +24,11 @@ if [ "$NATIVE_ABIGEN_VERSION" == "$GETH_VERSION" ]; then
     exit 0
 fi
 
-function cleanup() {
-    rm -rf "$TMPDIR"
-}
-
-trap cleanup EXIT
-
-TMPDIR="$(mktemp -d)"
-
-pushd "$TMPDIR"
-
-GETH_REPO_URL="https://github.com/ethereum/go-ethereum"
-git clone --depth=1 --single-branch --branch "$GETH_VERSION" "$GETH_REPO_URL"
-cd go-ethereum/cmd/abigen
+# GETH_REPO_URL="https://github.com/ethereum/go-ethereum"
+# git clone --depth=1 --single-branch --branch "$GETH_VERSION" "$GETH_REPO_URL"
+# cd go-ethereum/cmd/abigen
+GETH_REPO_URL="https://raw.githubusercontent.com/ethereum/go-ethereum/v$GETH_VERSION/cmd/abigen/main.go"
 go build
 cp ./abigen "$THIS_DIR"
 
 popd
-
