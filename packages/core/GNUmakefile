@@ -1,0 +1,130 @@
+.DEFAULT_GOAL := build
+
+ENVIRONMENT ?= release
+
+REPO := smartcontract/chainlink
+COMMIT_SHA ?= $(shell git rev-parse HEAD)
+VERSION = $(shell cat VERSION)
+GOBIN ?= $(GOPATH)/bin
+GO_LDFLAGS := $(shell tools/bin/ldflags)
+GOFLAGS = -ldflags "$(GO_LDFLAGS)"
+DOCKERFILE := core/chainlink.Dockerfile
+DOCKER_TAG ?= latest
+
+# SGX is disabled by default, but turned on when building from Docker
+SGX_ENABLED ?= no
+SGX_SIMULATION ?= yes
+SGX_ENCLAVE := enclave.signed.so
+SGX_TARGET := ./core/sgx/target/$(ENVIRONMENT)/
+
+ifneq (,$(filter yes true,$(SGX_ENABLED)))
+	GOFLAGS += -tags=sgx_enclave
+	SGX_BUILD_ENCLAVE := $(SGX_ENCLAVE)
+	DOCKERFILE := core/chainlink-sgx.Dockerfile
+	REPO := $(REPO)-sgx
+else
+	SGX_BUILD_ENCLAVE :=
+endif
+
+TAGGED_REPO := $(REPO):$(DOCKER_TAG)
+
+.PHONY: install
+install: install-chainlink-autoinstall ## Install chainlink and all its dependencies.
+
+.PHONY: install-git-hooks
+install-git-hooks:
+	git config core.hooksPath .githooks
+
+.PHONY: install-chainlink-autoinstall
+install-chainlink-autoinstall: | gomod install-chainlink
+
+.PHONY: gomod
+gomod: ## Ensure chainlink's go dependencies are installed.
+	@if [ -z "`which gencodec`" ]; then \
+		go get github.com/smartcontractkit/gencodec; \
+	fi || true
+	go mod download
+
+# .PHONY: gen-builder-cache
+# gen-builder-cache: gomod # generate a cache for the builder image
+# 	yarn install --frozen-lockfile
+# 	./tools/bin/restore-solc-cache
+
+.PHONY: install-chainlink
+install-chainlink: chainlink ## Install the chainlink binary.
+	cp $< $(GOBIN)/chainlink
+
+chainlink: $(SGX_BUILD_ENCLAVE) ## Build the chainlink binary.
+	CGO_ENABLED=0 go run ../packr/main.go "${CURDIR}/services/eth" ## embed contracts in .go file
+	go build $(GOFLAGS) -o $@ .
+
+.PHONY: chainlink-build
+chainlink-build:
+	CGO_ENABLED=0 go run ./packr/main.go "${CURDIR}/services/eth" ## embed contracts in .go file
+	CGO_ENABLED=0 go run ./packr/main.go "${CURDIR}/services"
+	go build $(GOFLAGS) -o chainlink .
+	# TODO: test the following command
+	# go build $(GOFLAGS) -o $(GOBIN)/chainlink .
+	cp chainlink $(GOBIN)/chainlink
+
+# TODO: Build the static frontend UI
+# .PHONY: operator-ui
+# operator-ui: ## Build the static frontend UI.
+# 	yarn setup:chainlink
+# 	CHAINLINK_VERSION="$(VERSION)@$(COMMIT_SHA)" yarn workspace @chainlink/operator-ui build
+	# CGO_ENABLED=0 go run packr/main.go "${CURDIR}/core/services" # !<-- this is in `chainlink-build` above
+
+# TODO: only compiles tsc and builds contracts and operator-ui
+# .PHONY: contracts-operator-ui-build
+# contracts-operator-ui-build: # only compiles tsc and builds contracts and operator-ui
+# 	yarn setup:chainlink
+# 	CHAINLINK_VERSION="$(VERSION)@$(COMMIT_SHA)" yarn workspace @chainlink/operator-ui build
+
+.PHONY: abigen
+abigen:
+	./tools/bin/build_abigen
+
+# TODO: build this as separate docker build
+# .PHONY: go-solidity-wrappers
+# go-solidity-wrappers: abigen ## Recompiles solidity contracts and their go wrappers
+# 	yarn workspace @chainlink/contracts compile
+# 	go generate ./core/internal/gethwrappers
+# 	go run ./packr/main.go ./core/services/eth/
+
+.PHONY: testdb
+testdb: ## Prepares the test database
+	go run ./core/main.go local db preparetest
+
+.PHONY: docker
+docker: ## Build the docker image.
+	docker build \
+		--build-arg ENVIRONMENT=$(ENVIRONMENT) \
+		--build-arg COMMIT_SHA=$(COMMIT_SHA) \
+		--build-arg SGX_SIMULATION=$(SGX_SIMULATION) \
+		-t $(TAGGED_REPO) \
+		-t $(REPO):$(COMMIT_SHA) \
+		-f $(DOCKERFILE) \
+		.
+
+.PHONY: dockerpush
+dockerpush: ## Push the docker image to dockerhub
+	docker push $(TAGGED_REPO)
+
+.PHONY: $(SGX_ENCLAVE)
+$(SGX_ENCLAVE):
+	@ENVIRONMENT=$(ENVIRONMENT) SGX_ENABLED=$(SGX_ENABLED) SGX_SIMULATION=$(SGX_SIMULATION) make -C sgx/
+	@ln -f $(SGX_TARGET)/libadapters.so sgx/target/libadapters.so
+
+.PHONY: enclave
+enclave: $(SGX_ENCLAVE)
+
+help:
+	@echo ""
+	@echo "         .__           .__       .__  .__        __"
+	@echo "    ____ |  |__ _____  |__| ____ |  | |__| ____ |  | __"
+	@echo "  _/ ___\|  |  \\\\\\__  \ |  |/    \|  | |  |/    \|  |/ /"
+	@echo "  \  \___|   Y  \/ __ \|  |   |  \  |_|  |   |  \    <"
+	@echo "   \___  >___|  (____  /__|___|  /____/__|___|  /__|_ \\"
+	@echo "       \/     \/     \/        \/             \/     \/"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
