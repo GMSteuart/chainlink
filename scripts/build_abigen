@@ -24,10 +24,13 @@ if [ "$NATIVE_ABIGEN_VERSION" == "$GETH_VERSION" ]; then
     exit 0
 fi
 
+pushd "$TMPDIR"
 # GETH_REPO_URL="https://github.com/ethereum/go-ethereum"
 # git clone --depth=1 --single-branch --branch "$GETH_VERSION" "$GETH_REPO_URL"
-# cd go-ethereum/cmd/abigen
+# TODO [refactor] confirm abigen solution
+mkdir -p go-ethereum/cmd/abigen && cd $_
 GETH_REPO_URL="https://raw.githubusercontent.com/ethereum/go-ethereum/v$GETH_VERSION/cmd/abigen/main.go"
+curl $GETH_REPO_URL -o "main.go"
 go build
 cp ./abigen "$THIS_DIR"
 
