@@ -8,12 +8,13 @@
     "belt": "./bin/run"
   },
   "scripts": {
+    "prepare": "yarn build:clean",
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean",
+    "prepack": "yarn build --force && oclif-dev manifest && oclif-dev readme",
     "postpack": "rm -f oclif.manifest.json",
-    "prepack": "yarn setup --force && oclif-dev manifest && oclif-dev readme",
-    "setup": "tsc -b",
-    "clean": "tsc -b --clean",
+    "prepublishOnly": "yarn clean && yarn build",
     "test": "jest",
-    "prepublishOnly": "yarn clean && yarn setup",
     "version": "oclif-dev readme && git add README.md"
   },
   "bugs": "https://github.com/smartcontractkit/chainlink/issues",
