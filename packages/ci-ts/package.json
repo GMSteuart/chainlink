@@ -9,8 +9,9 @@
     "node": ">=10.16"
   },
   "scripts": {
-    "setup": "tsc -b",
-    "clean": "tsc -b --clean",
+    "prepare": "yarn build:clean",
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean",
     "test": "jest"
   },
   "dependencies": {
