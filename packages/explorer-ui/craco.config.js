@@ -4,7 +4,7 @@ const CompressionPlugin = require('compression-webpack-plugin')
 const BrotliPlugin = require('brotli-webpack-plugin')
 const webpack = require('webpack')
 const clientPkg = require('./package.json')
-const serverPkg = require('../package.json')
+const serverPkg = require('@chainlink/explorer/package.json')
 const GitRevisionPlugin = require('git-revision-webpack-plugin')
 const gitRevisionPlugin = new GitRevisionPlugin({ branch: true })
 
@@ -30,11 +30,11 @@ module.exports = {
         __EXPLORER_CLIENT_VERSION__: JSON.stringify(clientPkg.version),
         __EXPLORER_SERVER_VERSION__: JSON.stringify(serverPkg.version),
         __GIT_SHA__: JSON.stringify(gitRevisionPlugin.commithash()),
-        __GIT_BRANCH__: JSON.stringify(gitRevisionPlugin.branch())
-      })
+        __GIT_BRANCH__: JSON.stringify(gitRevisionPlugin.branch()),
+      }),
     ],
   },
   eslint: {
-    enable: false
+    enable: false,
   },
 }

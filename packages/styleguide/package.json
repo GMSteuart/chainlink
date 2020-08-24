@@ -8,13 +8,14 @@
     "node": ">=10.16"
   },
   "scripts": {
+    "prepare": "yarn build:clean",
     "start": "start-storybook -p 9001",
-    "build-storybook": "build-storybook",
-    "depcheck": "echo '@chainlink/styleguide' && depcheck --ignore-dirs=dist || true",
-    "setup": "tsc -b",
-    "clean": "tsc -b --clean",
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean",
+    "build:storybook": "build-storybook",
     "test": "jest",
-    "test:ci": "yarn test --coverage --reporters jest-silent-reporter --maxWorkers=50%"
+    "test:ci": "yarn test --coverage --reporters jest-silent-reporter --maxWorkers=50%",
+    "depcheck": "echo '@chainlink/styleguide' && depcheck --ignore-dirs=dist || true"
   },
   "dependencies": {
     "@material-ui/core": "^3.9.2",

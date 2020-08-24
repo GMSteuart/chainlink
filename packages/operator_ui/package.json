@@ -7,14 +7,15 @@
     "node": ">=10.16"
   },
   "scripts": {
+    "prepare": "yarn build:webpack && yarn build:clean",
     "start": "NODE_ENV=development webpack-dev-server --open",
+    "build": "tsc -b",
+    "build:webpack": "NODE_ENV=production webpack",
+    "build:clean": "tsc -b --clean && rimraf -rf artifacts coverage tmp dist",
     "serve": "serve dist -p 3000",
     "test": "jest",
     "test:ci": "yarn test --coverage --reporters jest-silent-reporter --maxWorkers=50%",
-    "watch": "yarn test --watchAll --notify",
-    "clean": "tsc -b --clean && rimraf -rf artifacts coverage tmp dist",
-    "build": "NODE_ENV=production webpack",
-    "setup": "tsc -b",
+    "test:watch": "yarn test --watchAll --notify",
     "depcheck": "echo '@chainlink/operator-ui' && depcheck --ignore-dirs=dist || true"
   },
   "dependencies": {

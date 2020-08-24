@@ -1,6 +1,7 @@
 {
   "lerna": "latest",
   "packages": [
+    "contracts/*",
     "packages/*"
   ],
   "version": "1.0.0",

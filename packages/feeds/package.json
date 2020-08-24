@@ -19,16 +19,18 @@
     "yarn": "1.x"
   },
   "scripts": {
-    "start": "npm run server",
+    "prepare": "yarn build:theme && yarn build:clean",
+    "start": "yarn server",
     "start:dev": "cross-env PORT=3002 react-scripts start",
-    "prebuild": "yarn run build-theme",
-    "build": "react-scripts build",
+    "prebuild": "yarn build:theme",
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean && yarn clean",
+    "build:react": "react-scripts build",
+    "build:theme": "lessc --js src/theme/theme.less src/theme.css",
     "clean": "rimraf -rf build",
     "test": "jest",
-    "build-theme": "lessc --js src/theme/theme.less src/theme.css",
-    "watch-theme": "less-watch-compiler --enable-js src/theme src theme.less",
-    "server": "node server",
-    "setup": "tsc -b"
+    "watch:theme": "less-watch-compiler --enable-js src/theme src theme.less",
+    "server": "node server"
   },
   "dependencies": {
     "@chainlink/json-api-client": "0.0.1",

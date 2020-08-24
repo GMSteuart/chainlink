@@ -8,7 +8,7 @@ VERSION = $(shell cat VERSION)
 GOBIN ?= $(GOPATH)/bin
 GO_LDFLAGS := $(shell tools/bin/ldflags)
 GOFLAGS = -ldflags "$(GO_LDFLAGS)"
-DOCKERFILE := core/chainlink.Dockerfile
+DOCKERFILE := Dockerfile
 DOCKER_TAG ?= latest
 
 # SGX is disabled by default, but turned on when building from Docker
@@ -50,32 +50,23 @@ gomod: ## Ensure chainlink's go dependencies are installed.
 .PHONY: yarndep
 yarndep: ## Ensure all yarn dependencies are installed
 	yarn install --frozen-lockfile
-	./tools/bin/restore-solc-cache
+	./scripts/restore-solc-cache
 
 .PHONY: gen-builder-cache
 gen-builder-cache: gomod # generate a cache for the builder image
 	yarn install --frozen-lockfile
-	./tools/bin/restore-solc-cache
+	./scripts/restore-solc-cache
 
 .PHONY: install-chainlink
 install-chainlink: chainlink ## Install the chainlink binary.
 	cp $< $(GOBIN)/chainlink
 
-chainlink: $(SGX_BUILD_ENCLAVE) operator-ui ## Build the chainlink binary.
-	CGO_ENABLED=0 go run packr/main.go "${CURDIR}/core/services/eth" ## embed contracts in .go file
-	go build $(GOFLAGS) -o $@ ./core/
-
-.PHONY: chainlink-build
-chainlink-build:
-	CGO_ENABLED=0 go run packr/main.go "${CURDIR}/core/services/eth" ## embed contracts in .go file
-	CGO_ENABLED=0 go run packr/main.go "${CURDIR}/core/services"
-	go build $(GOFLAGS) -o chainlink ./core/
-	cp chainlink $(GOBIN)/chainlink
+chainlink: 
+	cd ./packages/core && make install
 
 .PHONY: operator-ui
 operator-ui: ## Build the static frontend UI.
-	yarn setup:chainlink
-	CHAINLINK_VERSION="$(VERSION)@$(COMMIT_SHA)" yarn workspace @chainlink/operator-ui build
+	CHAINLINK_VERSION="$(VERSION)@$(COMMIT_SHA)" yarn build
 	CGO_ENABLED=0 go run packr/main.go "${CURDIR}/core/services"
 
 .PHONY: contracts-operator-ui-build
@@ -83,13 +74,11 @@ contracts-operator-ui-build: # only compiles tsc and builds contracts and operat
 	yarn setup:chainlink
 	CHAINLINK_VERSION="$(VERSION)@$(COMMIT_SHA)" yarn workspace @chainlink/operator-ui build
 
-.PHONY: abigen
-abigen:
-	./tools/bin/build_abigen
 
 .PHONY: go-solidity-wrappers
 go-solidity-wrappers: abigen ## Recompiles solidity contracts and their go wrappers
-	yarn workspace @chainlink/contracts compile
+	# TODO [refactor] ensure contract compilation is occuring already
+	# yarn workspace @chainlink/contracts compile
 	go generate ./core/internal/gethwrappers
 	go run ./packr/main.go ./core/services/eth/
 
@@ -97,6 +86,7 @@ go-solidity-wrappers: abigen ## Recompiles solidity contracts and their go wrapp
 testdb: ## Prepares the test database
 	go run ./core/main.go local db preparetest
 
+# TODO [refactor] compare before/after images on size
 .PHONY: docker
 docker: ## Build the docker image.
 	docker build \
@@ -106,7 +96,7 @@ docker: ## Build the docker image.
 		-t $(TAGGED_REPO) \
 		-f $(DOCKERFILE) \
 		.
-
+# TODO [refactor] create isolated application images
 .PHONY: dockerpush
 dockerpush: ## Push the docker image to dockerhub
 	docker push $(TAGGED_REPO)

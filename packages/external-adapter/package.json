@@ -6,9 +6,10 @@
   "repository": "https://github.com/smartcontractkit/chainlink",
   "license": "MIT",
   "scripts": {
+    "prepare": "yarn build:clean",
     "start": "node .",
-    "setup": "tsc -b",
-    "clean": "tsc -b --clean"
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",

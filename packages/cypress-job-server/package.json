@@ -9,9 +9,10 @@
     "node": ">=10.16"
   },
   "scripts": {
+    "prepare": "yarn build:clean",
     "start": "node .",
-    "setup": "tsc -b",
-    "clean": "tsc -b --clean"
+    "build": "tsc -b",
+    "build:clean": "tsc -b --clean"
   },
   "devDependencies": {
     "@types/node": "^13.9.1",

@@ -9,15 +9,11 @@
   },
   "scripts": {
     "start": "lerna run start",
-    "lint": "eslint --ext js,jsx,ts,tsx .",
-    "setup": "lerna run setup",
-    "setup:chainlink": "lerna build --scope @chainlink/contracts --scope @chainlink/operator-ui",
-    "setup:contracts": "yarn wsrun -mre -p @chainlink/contracts -t setup",
-    "setup:integration": "yarn wsrun -mre -p @chainlink/integration* -t setup",
-    "setup:explorer": "yarn wsrun -mre -p '@chainlink/explorer*' -t setup",
+    "build": "go build -o chainlink ./packages/core/ && learna run build",
+    "build:clean": "lerna run build:clean",
     "clean": "lerna run clean",
-    "postinstall": "patch-package && lerna bootstrap",
-    "build": "go build -o chainlink ./packages/core/"
+    "postinstall": "lerna bootstrap",
+    "lint": "eslint --ext js,jsx,ts,tsx ."
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.15.0",

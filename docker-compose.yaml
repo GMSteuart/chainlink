@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  chainlink:
+    build:
+      context: packages/core
+    entrypoint: ''
+    # TODO [refactor] have application check if {ENV_VAR}_FILE is set and load it to allow for secrets
+    command: /bin/sh -c "chainlink node import /run/secrets/keystore && chainlink node start -d -p /run/secrets/node_password -a /run/secrets/apicredentials"
+    restart: always
+
+  feeds:
+    build:
+      context: packages/feeds
+    ports:
+      - '8080:8080'
