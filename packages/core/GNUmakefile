@@ -8,7 +8,7 @@ VERSION = $(shell cat VERSION)
 GOBIN ?= $(GOPATH)/bin
 GO_LDFLAGS := $(shell tools/bin/ldflags)
 GOFLAGS = -ldflags "$(GO_LDFLAGS)"
-DOCKERFILE := core/chainlink.Dockerfile
+DOCKERFILE := Dockerfile
 DOCKER_TAG ?= latest
 
 # SGX is disabled by default, but turned on when building from Docker
@@ -20,7 +20,7 @@ SGX_TARGET := ./core/sgx/target/$(ENVIRONMENT)/
 ifneq (,$(filter yes true,$(SGX_ENABLED)))
 	GOFLAGS += -tags=sgx_enclave
 	SGX_BUILD_ENCLAVE := $(SGX_ENCLAVE)
-	DOCKERFILE := core/chainlink-sgx.Dockerfile
+	DOCKERFILE := chainlink-sgx.Dockerfile
 	REPO := $(REPO)-sgx
 else
 	SGX_BUILD_ENCLAVE :=
@@ -55,7 +55,7 @@ install-chainlink: chainlink ## Install the chainlink binary.
 	cp $< $(GOBIN)/chainlink
 
 chainlink: $(SGX_BUILD_ENCLAVE) ## Build the chainlink binary.
-	CGO_ENABLED=0 go run ../packr/main.go "${CURDIR}/services/eth" ## embed contracts in .go file
+	CGO_ENABLED=0 go run packr/main.go "${CURDIR}/services/eth" ## embed contracts in .go file
 	go build $(GOFLAGS) -o $@ .
 
 .PHONY: chainlink-build
@@ -80,9 +80,9 @@ chainlink-build:
 # 	yarn setup:chainlink
 # 	CHAINLINK_VERSION="$(VERSION)@$(COMMIT_SHA)" yarn workspace @chainlink/operator-ui build
 
-.PHONY: abigen
-abigen:
-	./tools/bin/build_abigen
+# .PHONY: abigen
+# abigen:
+# 	./tools/bin/build_abigen
 
 # TODO: build this as separate docker build
 # .PHONY: go-solidity-wrappers
